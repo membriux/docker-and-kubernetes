@@ -23,7 +23,6 @@ const pgClient = new Pool({
       : { rejectUnauthorized: false },
 });
 
-// Connect to PostgreSQL and create table if it already doesn't exist
 pgClient.on('connect', (client) => {
   client
     .query('CREATE TABLE IF NOT EXISTS values (number INT)')
@@ -37,10 +36,6 @@ const redisClient = redis.createClient({
   port: keys.redisPort,
   retry_strategy: () => 1000,
 });
-
-// Redis best practices: create a separate client that will carry out
-// specific tasks. In this case we want a redis client specifically to
-// act as a publisher to redis
 const redisPublisher = redisClient.duplicate();
 
 // Express route handlers
@@ -56,8 +51,6 @@ app.get('/values/all', async (req, res) => {
 });
 
 app.get('/values/current', async (req, res) => {
-  // redis does not handle promises
-  // thus we use callback method for getting values
   redisClient.hgetall('values', (err, values) => {
     res.send(values);
   });
@@ -78,5 +71,5 @@ app.post('/values', async (req, res) => {
 });
 
 app.listen(5000, (err) => {
-  console.log('Listening on container port 5000');
+  console.log('Listening');
 });

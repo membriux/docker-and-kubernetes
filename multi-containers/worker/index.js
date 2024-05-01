@@ -6,6 +6,10 @@ const redisClient = redis.createClient({
   port: keys.redisPort,
   retry_strategy: () => 1000,
 });
+
+// Redis best practices: create a separate client that will carry out
+// specific tasks. In this case we want a redis client specifically to
+// act as a subscriber to redis and listen to messages from redis
 const sub = redisClient.duplicate();
 
 function fib(index) {
