@@ -1,0 +1,53 @@
+version: '3'
+services:  
+  postgres:
+    image: "postgres:latest"
+    environment:
+      - POSTGRES_PASSWORD=postgres_password
+  redis:
+    image: "redis:latest"
+  nginx:
+    restart: always # nginx always has to be running before the other services
+    build: 
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    ports:
+      - 3000:80
+    depends_on:
+      - api
+      - client
+  api:
+    build: 
+      dockerfile: Dockerfile.dev
+      context: ./server # context is directory to look at
+    volumes:
+      - /app/node_modules # our machine cannot modify this folder inside container 
+      - ./server:/app # any changes we make in our machine are reflected in our container using this volume
+    environment:
+      - REDIS_HOST=redis # name of our defined service
+      - REDIS_PORT=6379
+      - PGUSER=postgres
+      - PGHOST=postgres
+      - PGDATABASE=postgres
+      - PGPASSWORD=postgres_password
+      - PGPORT=5432
+  worker:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./worker
+    volumes:
+      - /app/node_modules
+      - ./worker:/app
+    environment: 
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+  client:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./client
+    volumes:
+      - /app/node_modules
+      - ./client:/app
+    environment:
+      - WDS_SOCKET_PORT=0
+
