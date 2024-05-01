@@ -1,0 +1,13 @@
+version: '3'
+services:
+  redis-server:
+    image: 'redis'
+  node-app:
+    # restart: always  # recommended for production servers/webapps
+    # restart: on-failure  # recommended for internal processes
+    restart: unless-stopped # recommended for one-time execution (i.e process data, train machine learning model, etc)
+    build: .
+    ports: 
+      - "4001:8081" # to:from
+
+    
